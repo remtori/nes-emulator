@@ -1,0 +1,17 @@
+[package]
+name = "nes"
+version = "0.1.0"
+edition = "2018"
+resolver = "2"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "nes-emulator"
+path = "src/main.rs"
+
+[dependencies]
+eframe = "0.14"
