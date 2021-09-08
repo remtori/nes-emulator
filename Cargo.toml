@@ -14,4 +14,5 @@ name = "nes"
 path = "src/main.rs"
 
 [dependencies]
+bitflags = "1"
 eframe = "0.14"
