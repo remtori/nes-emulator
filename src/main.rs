@@ -4,7 +4,7 @@
 // When compiling natively
 #[cfg(not(target_arch = "wasm32"))]
 fn main() {
-    let app = nes::App::default();
+    let app = nes_emulator::App::default();
     let native_options = eframe::NativeOptions {
         always_on_top: false,
         decorated: true,

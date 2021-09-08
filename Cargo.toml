@@ -1,5 +1,5 @@
 [package]
-name = "nes"
+name = "nes-emulator"
 version = "0.1.0"
 edition = "2018"
 resolver = "2"
@@ -10,7 +10,7 @@ resolver = "2"
 crate-type = ["cdylib", "rlib"]
 
 [[bin]]
-name = "nes-emulator"
+name = "nes"
 path = "src/main.rs"
 
 [dependencies]
