@@ -474,7 +474,7 @@ pub(super) fn dey(cpu: &mut Cpu6502, _bus: &mut Bus, _data: &AddressingData) -> 
 ///
 /// Flags out: N, Z
 pub(super) fn inc(cpu: &mut Cpu6502, bus: &mut Bus, data: &AddressingData) -> bool {
-    let value = data.fetch(bus) + 1;
+    let value = data.fetch(bus).wrapping_add(1);
     bus.write(data.address, value);
     set_flags!(cpu, value, NZ);
     false
@@ -486,7 +486,7 @@ pub(super) fn inc(cpu: &mut Cpu6502, bus: &mut Bus, data: &AddressingData) -> bo
 ///
 /// Flags out: N, Z
 pub(super) fn inx(cpu: &mut Cpu6502, _bus: &mut Bus, _data: &AddressingData) -> bool {
-    cpu.x += 1;
+    cpu.x = cpu.x.wrapping_add(1);
     set_flags!(cpu, cpu.x, NZ);
     false
 }
@@ -497,7 +497,7 @@ pub(super) fn inx(cpu: &mut Cpu6502, _bus: &mut Bus, _data: &AddressingData) -> 
 ///
 /// Flags out: N, Z
 pub(super) fn iny(cpu: &mut Cpu6502, _bus: &mut Bus, _data: &AddressingData) -> bool {
-    cpu.y += 1;
+    cpu.y = cpu.y.wrapping_add(1);
     set_flags!(cpu, cpu.y, NZ);
     false
 }
