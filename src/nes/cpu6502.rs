@@ -208,7 +208,7 @@ impl Cpu6502 {
 
             // Perform fetch of intermediate data using the
             // required addressing mode
-            let addressing = (instruction.addressing)(self, bus);
+            let addressing = instruction.addressing_mode.load(self, bus);
 
             // Perform operation
             let require_additional_cycle = (instruction.operate)(self, bus, &addressing);
@@ -275,19 +275,19 @@ impl Cpu6502 {
     pub fn disassemble(range: RangeInclusive<u16>, bus: &mut Bus) -> BTreeMap<u16, String> {
         let mut out = BTreeMap::new();
 
-        let mut addr = *range.start();
-        let end = *range.end();
+        let mut addr = *range.start() as u32;
+        let end = *range.end() as u32;
 
-        let read = |addr: &mut u16| -> u8 {
-            let ret = bus.read(*addr, true);
+        let read = |addr: &mut u32| -> u8 {
+            let ret = bus.read(*addr as u16, true);
             *addr += 1;
             ret
         };
 
-        let read_u16 = |addr: &mut u16| -> u16 {
-            let lo = bus.read(*addr, true);
+        let read_u16 = |addr: &mut u32| -> u16 {
+            let lo = bus.read(*addr as u16, true);
             *addr += 1;
-            let hi = bus.read(*addr, true);
+            let hi = bus.read(*addr as u16, true);
             *addr += 1;
 
             (lo as u16) | ((hi as u16) << 8)
@@ -308,25 +308,25 @@ impl Cpu6502 {
             // 6502 in order to get accurate data as part of the
             // instruction
             match instruction.addressing_mode {
-                AddressingMode::IMP => write!(str_ins, " {{IMP}}"),
-                AddressingMode::IMM => write!(str_ins, "#${:02X} {{IMM}}", read(&mut addr)),
-                AddressingMode::ZP0 => write!(str_ins, "${:02X} {{ZP0}}", read(&mut addr)),
-                AddressingMode::ZPX => write!(str_ins, "${:02X}, X {{ZPX}}", read(&mut addr)),
-                AddressingMode::ZPY => write!(str_ins, "${:02X}, Y {{ZPY}}", read(&mut addr)),
-                AddressingMode::REL => {
+                AddressingMode::Implied => write!(str_ins, " {{IMP}}"),
+                AddressingMode::Immediate => write!(str_ins, "#${:02X} {{IMM}}", read(&mut addr)),
+                AddressingMode::ZeroPage => write!(str_ins, "${:02X} {{ZP0}}", read(&mut addr)),
+                AddressingMode::ZeroPageX => write!(str_ins, "${:02X}, X {{ZPX}}", read(&mut addr)),
+                AddressingMode::ZeroPageY => write!(str_ins, "${:02X}, Y {{ZPY}}", read(&mut addr)),
+                AddressingMode::Relative => {
                     let value = read(&mut addr);
-                    write!(str_ins, "${:02X}[${:04X}] {{REL}}", value, addr + value as u16)
+                    write!(str_ins, "${:02X}[${:04X}] {{REL}}", value, addr as u16 + value as u16)
                 }
-                AddressingMode::ABS => write!(str_ins, "${:04X} {{ABS}}", read_u16(&mut addr)),
-                AddressingMode::ABX => write!(str_ins, "${:04X}, X {{ABX}}", read_u16(&mut addr)),
-                AddressingMode::ABY => write!(str_ins, "${:04X}, Y {{ABY}}", read_u16(&mut addr)),
-                AddressingMode::IND => write!(str_ins, "(${:04X}) {{IND}}", read_u16(&mut addr)),
-                AddressingMode::IZX => write!(str_ins, "(${:02X}, X) {{IZX}}", read(&mut addr)),
-                AddressingMode::IZY => write!(str_ins, "(${:02X}), Y {{IZY}}", read(&mut addr)),
+                AddressingMode::Absolute => write!(str_ins, "${:04X} {{ABS}}", read_u16(&mut addr)),
+                AddressingMode::AbsoluteX => write!(str_ins, "${:04X}, X {{ABX}}", read_u16(&mut addr)),
+                AddressingMode::AbsoluteY => write!(str_ins, "${:04X}, Y {{ABY}}", read_u16(&mut addr)),
+                AddressingMode::Indirect => write!(str_ins, "(${:04X}) {{IND}}", read_u16(&mut addr)),
+                AddressingMode::IndirectX => write!(str_ins, "(${:02X}, X) {{IZX}}", read(&mut addr)),
+                AddressingMode::IndirectY => write!(str_ins, "(${:02X}), Y {{IZY}}", read(&mut addr)),
             }
             .unwrap();
 
-            out.insert(line_addr, std::mem::take(str_ins));
+            out.insert(line_addr as u16, std::mem::take(str_ins));
         }
 
         out

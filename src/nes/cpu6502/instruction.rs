@@ -3,7 +3,6 @@ use super::{AddressingData, AddressingMode, Bus, Cpu6502, Flags};
 pub struct Instruction {
     pub(super) name: &'static str,
     pub(super) operate: fn(&mut Cpu6502, &mut Bus, &AddressingData) -> bool,
-    pub(super) addressing: fn(&mut Cpu6502, &Bus) -> AddressingData,
     pub(super) addressing_mode: AddressingMode,
     pub(super) cycles: u8,
 }
@@ -187,7 +186,7 @@ pub(super) fn asl(cpu: &mut Cpu6502, bus: &mut Bus, data: &AddressingData) -> bo
     let value = (data.fetch(bus) as u16) << 1;
     set_flags!(cpu, value, NZC);
 
-    if matches!(data.addressing_mode, AddressingMode::IMP) {
+    if matches!(data.addressing_mode, AddressingMode::Implied) {
         cpu.a = (value & 0xFF) as u8;
     } else {
         bus.write(data.address, (value & 0xFF) as u8);
@@ -208,7 +207,7 @@ pub(super) fn lsr(cpu: &mut Cpu6502, bus: &mut Bus, data: &AddressingData) -> bo
     let fetched = fetched >> 1;
     set_flags!(cpu, fetched, NZ);
 
-    if matches!(data.addressing_mode, AddressingMode::IMP) {
+    if matches!(data.addressing_mode, AddressingMode::Implied) {
         cpu.a = fetched;
     } else {
         bus.write(data.address, fetched);
@@ -226,7 +225,7 @@ pub(super) fn rol(cpu: &mut Cpu6502, bus: &mut Bus, data: &AddressingData) -> bo
     let value = ((data.fetch(bus) as u16) << 1) | cpu.get(Flags::C) as u16;
     set_flags!(cpu, value, NZC);
 
-    if matches!(data.addressing_mode, AddressingMode::IMP) {
+    if matches!(data.addressing_mode, AddressingMode::Implied) {
         cpu.a = value as u8;
     } else {
         bus.write(data.address, value as u8);
@@ -248,7 +247,7 @@ pub(super) fn ror(cpu: &mut Cpu6502, bus: &mut Bus, data: &AddressingData) -> bo
     cpu.set(Flags::C, fetched & 1 > 0);
     set_flags!(cpu, value, NZ);
 
-    if matches!(data.addressing_mode, AddressingMode::IMP) {
+    if matches!(data.addressing_mode, AddressingMode::Implied) {
         cpu.a = value;
     } else {
         bus.write(data.address, value);
